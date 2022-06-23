@@ -45,7 +45,7 @@ app.get('/getURLTing', (req, res) => {
     //client secret
     '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',
     //redirect to link
-    'http://localhost:3000/steps'
+    'http://localhost:3001/steps'
   );
   const scopes = ['https://www.googleapis.com/auth/fitness.activity.read profile email openid'];
 
@@ -77,7 +77,7 @@ app.get('/steps', async (req, res) => {
     //client secret
     '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',
     //redirect to link
-    'http://localhost:3000/steps'
+    'http://localhost:3001/steps'
   );
 
   const tokens = await oauth2Client.getToken(code);
@@ -85,25 +85,45 @@ app.get('/steps', async (req, res) => {
   res.send('You Google Fit Account has been connected');
   
   try {
-    const result = await axios({
-      method: 'POST',
+    axios.get('https://www.googleapis.com/fitness/v1/users/userId/sessions', {
+      headers: {authorization: 'Bearer ' + tokens.tokens.access_token},
+    })
+      .then(response => {
+        data = response.data
+       console.log(data)
+      })
+      .catch(error => {
+        if (error.response) {
+          //get HTTP error code
+          console.log(error.response.status)
+          console.log(error.message)
+          console.log(error)
+        } else {
+          console.log(error.message)
+        }
+      })
+
+/*
+const result = await axios({
+      method: 'GET',
       headers: {
         authorization: 'Bearer ' + tokens.tokens.access_token
       },
       'Content-Type': 'application/json',
-      url: `https://www.googleapis.com/fitness/v1/users/userId/dataset:aggregate`,
-      data: {
+      url: `https://www.googleapis.com/fitness/v1/users/userId/sessions`,
+      /*data: {
         aggregateBy: [{
           dataTypeName: 'com.google.sleep.segment',
           dataSourceId: 'derived:com.google.sleep.segment:com.google.android.gms:sleep_from_activity<-raw:com.google.activity.segment:com.heytap.wearable.health:stream_sleep'
         }],
         bucketByTime: { durationMillis: 1000*60*60*24 },
-        startTimeMillis: 1654724414419, //get from https://currentmillis.com
-        endTimeMillis: 1654802114419 
-      }
+        startTimeMillis: 1655510511171, //get from https://currentmillis.com
+        endTimeMillis: 1655596911171 
+      } // * / this was a break... 
     });
-    // console.log(result);
-    stepArray = result.data.bucket;
+*/
+
+
   } catch (e) {
     console.log(e);
   }
