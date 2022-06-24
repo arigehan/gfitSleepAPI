@@ -85,7 +85,7 @@ app.get('/steps', async (req, res) => {
   res.send('You Google Fit Account has been connected');
   
   try {
-    axios.get('https://www.googleapis.com/fitness/v1/users/userId/sessions', {
+    axios.get('https://www.googleapis.com/fitness/v1/users/me/sessions?startTime=1985-04-12T23:20:50.52Z&activityType=72', {
       headers: {authorization: 'Bearer ' + tokens.tokens.access_token},
     })
       .then(response => {
@@ -97,11 +97,25 @@ app.get('/steps', async (req, res) => {
           //get HTTP error code
           console.log(error.response.status)
           console.log(error.message)
-          console.log(error)
+          console.log(error.response.data)
+          console.log(error.response.data.errors)
         } else {
           console.log(error.message)
+          console.log(error.data)
         }
       })
+/*
+data: {
+        aggregateBy: [{
+          dataTypeName: 'com.google.step_count.delta',
+          dataSourceId: 'derived:com.google.step_count.delta:com.google.android.gms:estimated_steps'
+        }],
+        bucketByTime: { durationMillis: 1000*60*60*24 }, // this means it will show one day at a time instead of the bursts you walked in
+        startTimeMillis: 1654747914419, //get from https://currentmillis.com
+        endTimeMillis: 1654834314419
+
+        */
+
 
 /*
 const result = await axios({
