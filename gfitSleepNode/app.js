@@ -38,14 +38,14 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 // get request
-app.get('/getURLTing', (req, res) => {
+app.get('/getSleep', (req, res) => {
   const oauth2Client = new google.auth.OAuth2(
     //client id
-    '491645927911-o93tk3d9934pbpg0c7u0aq2ejj4hfkmc.apps.googleusercontent.com',
+    '79485309173-jutqi66l6q5um7abflpsi4t2f0t4o1jr.apps.googleusercontent.com',
     //client secret
-    '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',
+    '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',
     //redirect to link
-    'http://localhost:3001/steps'
+    'http://localhost:3001/sleep'
   );
   const scopes = ['https://www.googleapis.com/auth/fitness.activity.read profile email openid'];
 
@@ -64,7 +64,7 @@ app.get('/getURLTing', (req, res) => {
   })
 });
 
-app.get('/steps', async (req, res) => {
+app.get('/sleep', async (req, res) => {
   const queryURL = new urlParse(req.url);
   const code = queryParse.parse(queryURL.query).code;
 
@@ -73,11 +73,11 @@ app.get('/steps', async (req, res) => {
 
   const oauth2Client = new google.auth.OAuth2(
     //client id
-    '491645927911-o93tk3d9934pbpg0c7u0aq2ejj4hfkmc.apps.googleusercontent.com',
+    '79485309173-jutqi66l6q5um7abflpsi4t2f0t4o1jr.apps.googleusercontent.com',
     //client secret
-    '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',
+    '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',
     //redirect to link
-    'http://localhost:3001/steps'
+    'http://localhost:3001/sleep'
   );
 
   const tokens = await oauth2Client.getToken(code);
@@ -85,11 +85,12 @@ app.get('/steps', async (req, res) => {
   res.send('You Google Fit Account has been connected');
   
   try {
-    axios.get('https://www.googleapis.com/fitness/v1/users/me/sessions?startTime=1985-04-12T23:20:50.52Z&activityType=72', {
-      headers: {authorization: 'Bearer ' + tokens.tokens.access_token},
+    axios.get('https://fitness.googleapis.com/fitness/v1/users/me/sessions?activityType=72&includeDeleted=true&startTime=2022-06-19T23%3A20%3A50.52Z', {
+      headers: {authorization: 'Bearer ' + 'ya29.A0ARrdaM_AlhaE7SRwu7AvjgKg9CMVcBFyRWlOe8TGk8e0bnH5ndXY549AxtrDGvHeeuxBXtbHakJd0xHmX_OYAuorcYu9lQ1zZbnoAXddi2_T0e9N1Zc8cZ4e1O9ne3yvh9PXx56k_TMCDfBKqyAzn-j9yUDjYUNnWUtBVEFTQVRBU0ZRRl91NjFWNlQ3VGptSHVsaEVZbkt2WUFFaEVCQQ0163'},
+      //need to get refresh token 1//04Dc1V8pPp3RLCgYIARAAGAQSNwF-L9IrI4GDjDHF2mDeRa_387nZElRB9j43gW4XemB_WNT0nvtbxqt9kTlTsdv5_xq1TR9FFQE
     })
       .then(response => {
-        data = response.data
+       data = response.data
        console.log(data)
       })
       .catch(error => {
@@ -104,43 +105,47 @@ app.get('/steps', async (req, res) => {
           console.log(error.data)
         }
       })
-/*
-data: {
-        aggregateBy: [{
-          dataTypeName: 'com.google.step_count.delta',
-          dataSourceId: 'derived:com.google.step_count.delta:com.google.android.gms:estimated_steps'
-        }],
-        bucketByTime: { durationMillis: 1000*60*60*24 }, // this means it will show one day at a time instead of the bursts you walked in
-        startTimeMillis: 1654747914419, //get from https://currentmillis.com
-        endTimeMillis: 1654834314419
-
-        */
-
-
-/*
-const result = await axios({
-      method: 'GET',
-      headers: {
-        authorization: 'Bearer ' + tokens.tokens.access_token
-      },
-      'Content-Type': 'application/json',
-      url: `https://www.googleapis.com/fitness/v1/users/userId/sessions`,
-      /*data: {
-        aggregateBy: [{
-          dataTypeName: 'com.google.sleep.segment',
-          dataSourceId: 'derived:com.google.sleep.segment:com.google.android.gms:sleep_from_activity<-raw:com.google.activity.segment:com.heytap.wearable.health:stream_sleep'
-        }],
-        bucketByTime: { durationMillis: 1000*60*60*24 },
-        startTimeMillis: 1655510511171, //get from https://currentmillis.com
-        endTimeMillis: 1655596911171 
-      } // * / this was a break... 
-    });
-*/
-
-
   } catch (e) {
     console.log(e);
   }
+
+var data = JSON.stringify(
+  {
+    "aggregateBy": [
+      {
+        "dataTypeName": "com.google.sleep.segment"
+      }
+    ],
+    "endTimeMillis": 1656169552629,
+    "startTimeMillis": 1655705515962
+  }
+)
+
+  try {
+    axios.post('https://www.googleapis.com/fitness/v1/users/me/dataset:aggregate', {
+      headers: {authorization: 'Bearer ' + 'ya29.A0ARrdaM_AlhaE7SRwu7AvjgKg9CMVcBFyRWlOe8TGk8e0bnH5ndXY549AxtrDGvHeeuxBXtbHakJd0xHmX_OYAuorcYu9lQ1zZbnoAXddi2_T0e9N1Zc8cZ4e1O9ne3yvh9PXx56k_TMCDfBKqyAzn-j9yUDjYUNnWUtBVEFTQVRBU0ZRRl91NjFWNlQ3VGptSHVsaEVZbkt2WUFFaEVCQQ0163'},
+      data: data
+    })
+      .then(response => {
+       data = response.data
+       console.log(data)
+      })
+      .catch(error => {
+        if (error.response) {
+          //get HTTP error code
+          console.log(error.response.status)
+          console.log(error.message)
+          console.log(error.response.data)
+          console.log(error.response.data.errors)
+        } else {
+          console.log(error.message)
+          console.log(error.data)
+        }
+      })
+  } catch (e) {
+    console.log(e);
+  }
+
 
 
 })
