@@ -47,7 +47,7 @@ app.get('/getSleep', (req, res) => {
     //redirect to link
     'http://localhost:3001/sleep'
   );
-  const scopes = ['https://www.googleapis.com/auth/fitness.activity.read profile email openid'];
+  const scopes = ['https://www.googleapis.com/auth/fitness.sleep.read', 'https://www.googleapis.com/auth/fitness.activity.read', 'profile', 'email', 'openid'];
 
   const url = oauth2Client.generateAuthUrl({
     access_type: 'offline',
@@ -80,13 +80,13 @@ app.get('/sleep', async (req, res) => {
     'http://localhost:3001/sleep'
   );
 
-  const tokens = await oauth2Client.getToken(code);
-  //console.log(tokens);
+  const {tokens} = await oauth2Client.getToken(code);
+  //console.log(tokens, 'token');
   res.send('You Google Fit Account has been connected');
   
   try {
     axios.get('https://fitness.googleapis.com/fitness/v1/users/me/sessions?activityType=72&includeDeleted=true&startTime=2022-06-19T23%3A20%3A50.52Z', {
-      headers: {authorization: 'Bearer ' + 'ya29.A0ARrdaM_AlhaE7SRwu7AvjgKg9CMVcBFyRWlOe8TGk8e0bnH5ndXY549AxtrDGvHeeuxBXtbHakJd0xHmX_OYAuorcYu9lQ1zZbnoAXddi2_T0e9N1Zc8cZ4e1O9ne3yvh9PXx56k_TMCDfBKqyAzn-j9yUDjYUNnWUtBVEFTQVRBU0ZRRl91NjFWNlQ3VGptSHVsaEVZbkt2WUFFaEVCQQ0163'},
+      headers: {authorization: 'Bearer ' + tokens.access_token},
       //need to get refresh token 1//04Dc1V8pPp3RLCgYIARAAGAQSNwF-L9IrI4GDjDHF2mDeRa_387nZElRB9j43gW4XemB_WNT0nvtbxqt9kTlTsdv5_xq1TR9FFQE
     })
       .then(response => {
@@ -108,23 +108,20 @@ app.get('/sleep', async (req, res) => {
   } catch (e) {
     console.log(e);
   }
-
-var data = JSON.stringify(
-  {
-    "aggregateBy": [
-      {
-        "dataTypeName": "com.google.sleep.segment"
-      }
-    ],
-    "endTimeMillis": 1656169552629,
-    "startTimeMillis": 1655705515962
-  }
-)
-
+/* //UNAUTHENTICATED ERROR: 
   try {
     axios.post('https://www.googleapis.com/fitness/v1/users/me/dataset:aggregate', {
-      headers: {authorization: 'Bearer ' + 'ya29.A0ARrdaM_AlhaE7SRwu7AvjgKg9CMVcBFyRWlOe8TGk8e0bnH5ndXY549AxtrDGvHeeuxBXtbHakJd0xHmX_OYAuorcYu9lQ1zZbnoAXddi2_T0e9N1Zc8cZ4e1O9ne3yvh9PXx56k_TMCDfBKqyAzn-j9yUDjYUNnWUtBVEFTQVRBU0ZRRl91NjFWNlQ3VGptSHVsaEVZbkt2WUFFaEVCQQ0163'},
-      data: data
+      headers: {
+        authorization: 'Bearer ' + tokens.access_token,
+        'Content-Type': 'application/json'
+      },
+      data: {
+        aggregateBy: [{
+            dataTypeName: "com.google.sleep.segment"
+        }],
+        endTimeMillis: 1656169552629,
+        startTimeMillis: 1655705515962
+      }
     })
       .then(response => {
        data = response.data
@@ -133,10 +130,10 @@ var data = JSON.stringify(
       .catch(error => {
         if (error.response) {
           //get HTTP error code
-          console.log(error.response.status)
-          console.log(error.message)
-          console.log(error.response.data)
-          console.log(error.response.data.errors)
+          console.log(error.response.status) //401
+          console.log(error.message) //Request failed with status code 401
+          console.log(error.response.data) // [object Object]
+          console.log(error.response.data.errors) // undefined
         } else {
           console.log(error.message)
           console.log(error.data)
@@ -145,9 +142,36 @@ var data = JSON.stringify(
   } catch (e) {
     console.log(e);
   }
+*/
 
-
-
+  var axios = require('axios');
+  var data = JSON.stringify({
+    "aggregateBy": [
+      {
+        "dataTypeName": "com.google.sleep.segment"
+      }
+    ],
+    "endTimeMillis": 1656539467129,
+    "startTimeMillis": 1655705515962
+  });
+  
+  var config = {
+    method: 'post',
+    url: 'https://www.googleapis.com/fitness/v1/users/me/dataset:aggregate',
+    headers: { 
+      'Authorization': 'Bearer ' + tokens.access_token, 
+      'Content-Type': 'application/json'
+    },
+    data : data
+  };
+  
+  axios(config)
+  .then(function (response) {
+    console.log(JSON.stringify(response.data));
+  })
+  .catch(function (error) {
+    console.log(error);
+  });
 })
   
 
